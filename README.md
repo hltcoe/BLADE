@@ -1,3 +1,92 @@
+# BLADE
+BLADE (Bilingual Lexical AnD Expansion model) is a neural CLIR method, which creates sparse bilingual vectors for queries and documents in two different languages.
+
+BLADE is powered by a bilingual language model, created by pruning a multilingual pretrained language model (mBERT).
+The pruned bilingual models are available for most of the CLIR documents collections used in the paper.
+- French: https://huggingface.co/Geotrend/bert-base-en-fr-cased
+- Italian: https://huggingface.co/Geotrend/bert-base-en-it-cased
+- German: https://huggingface.co/Geotrend/bert-base-en-de-cased
+- Spanish: https://huggingface.co/Geotrend/bert-base-en-es-cased
+- Chinese: https://huggingface.co/Geotrend/bert-base-en-zh-cased
+- Russian: https://huggingface.co/Geotrend/bert-base-en-ru-cased
+
+For Persian, we create a pruned bilingual model using the steps detailed in the [Geotrend codebase](https://github.com/Geotrend-research/smaller-transformers) and release it on the HuggingFace [hub](https://huggingface.co/srnair/bert-base-en-fa-cased) 
+
+# Training BLADE model
+
+BLADE model can be trained in a two-step process.
+
+## Step 1: Intermediate Pretraining
+
+We start with a pruned bilingual language model consisting of query and document language and perform an intermediate pretraining using aligned texts expressed in their native language. 
+
+Assuming we have aligned pairs of text (parallel sentences/passages or comparable passages) in the format `{query_language_text}\t{document_language_text}`, we preprocess the dataset using the code below:
+
+```
+python scripts/prepare_pretrain_data.py \
+    --input path_to_aligned_text_in_tsv \
+    --output path_to_pretraining_corpus
+```
+
+The intermediate pretraining can be performed using the following [tevatron] (https://github.com/texttron/tevatron) implementation.
+```
+python -m torch.distributed.launch --nproc_per_node=8 intermediate/src/tevatron/train.py \
+    --model_name_or_path $MODEL_NAME \
+    --train_dir path_to_pretraining_corpus \
+    --output_dir path_to_intermediate_output_directory \
+    --doc_lang $lang \
+    --per_device_train_batch_size 24 \
+    --train_n_passages 1 \
+    --learning_rate 1e-5 \
+    --max_steps 200000 \
+    --save_steps 50000 \
+    --dataloader_num_workers 2 \
+    --do_train \
+    --fp16 \
+    --negatives_x_device \
+    --freeze_layers
+```
+
+The `$MODEL_NAME` refers to the pruned bilingual model and `$lang` is a two-letter language code referring to the document language.
+
+
+## Step 2: Retrieval Finetuning
+
+Once we have the intermediate pretrained model, we adopt a translate-train approach to fine-tune the model for the downstream CLIR task.
+We use MS MARCO collection specifically pairing the original English MS MARCO queries with the translated MS MARCO passages released as [mmarco](https://huggingface.co/datasets/unicamp-dl/mmarco/tree/main/data/google/collections).
+
+We first prepare the translate-train dataset using the following code:
+
+```
+python prepare_tt_data.py \
+    --input data/english_msmarco.jsonl \
+    --passage_file path_to_mmarco_document_collection_tsv \
+    --output path_to_finetuning_data
+```
+
+The script uses the English MS MARCO training data and creates a translate train dataset by replacing the positive and negative passages using the passage identifier mapping between the original and translated passage collection.
+
+The retrieval finetuning can be performed using the following [tevatron] (https://github.com/texttron/tevatron) implementation.
+
+```
+python -m torch.distributed.launch --nproc_per_node=8 src/tevatron/driver/train.py \
+    --model_name_or_path path_to_intermediate_pretrained_checkpoint \
+    --train_dir $CORPUS \
+    --output_dir path_to_finetuned_output_directory \
+    --q_distil data/query_vector_distil.json \
+    --p_distil data/passage_vector_distil.jsonl \
+    --p_offset data/passage_vector_distil.offset \
+    --per_device_train_batch_size 32 \
+    --train_n_passages 2 \
+    --learning_rate 1e-5 \
+    --dataloader_num_workers 2 \
+    --max_steps 100000 \
+    --save_steps 50000 \
+    --do_train \
+    --fp16 \
+    --negatives_x_device
+```
+
 # Running BLADE model
 
 We provide the instructions to run a fine-tuned BLADE model on a CLIR collection.  The BLADE-C checkpoints are available on huggingface for English queries and Chinese, Persian, and Russian document languages (more document languages to follow!) which can be found here:
