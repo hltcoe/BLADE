@@ -158,15 +158,17 @@ We first create bilingual sparse vectors for a CLIR document collection using th
 mkdir -p $EXP_DIR/doc_outputs
 
 python inference.py \
-    --model_path=$MODEL_PATH \
+    --model_name=$MODEL_NAME \
     --input=$EXP_DIR/path_to_collection.tsv \
     --output=$EXP_DIR/doc_outputs/blade.jsonl \
     --batch_size=128
 ```
 
-The model path could be the fine-tuned model available on HuggingFace or a custom fine-tuned model path stored locally.
+The model name could be the fine-tuned BLADE model available on HuggingFace or a custom fine-tuned model path stored locally.
 The input here is the `collection.tsv` file generated as part of the data prep process above.
 The script outputs the blade vectors in JSONL file which is in a compatible format to be indexed by Anserini.
+
+For faster indexing, we can split the `collection.tsv` file into multiple subcollections and launch separate inference process for each subcollection.
 
 ### Step 2: Index BLADE vectors using Anserini
 
@@ -185,6 +187,7 @@ sh path_to_anserini_target/appassembler/bin/IndexCollection \
     -pretokenized
 ```
 
+Anserini will read all the input JSONL files from the input directory and create a sparse index.
 You can tweak the `threads` parameter depending on the machine for faster execution time.
 
 
@@ -204,7 +207,7 @@ We first create bilingual sparse vectors for queries using the code as shown bel
 mkdir -p $EXP_DIR/runs
 
 python inference.py \
-    --model_path=$MODEL_PATH \
+    --model_name=$MODEL_NAME \
     --input=path_to_queries.tsv \
     --output=$EXP_DIR/runs/blade.jsonl \
     --batch_size=128 \

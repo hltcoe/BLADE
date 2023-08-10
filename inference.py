@@ -58,15 +58,15 @@ def process_text(texts, ids, model, tokenizer, device, reverse_voc, max_length, 
 
 if __name__=="__main__":
     parser = ArgumentParser(description='Generate bilingual vectors using BLADE model')
-    parser.add_argument('--model_path', dest='model_path', required=True)
+    parser.add_argument('--model_name', dest='model_name', required=True)
     parser.add_argument('--input', dest='input', required=True)
     parser.add_argument('--output', dest='output', required=True)
     parser.add_argument('--batch_size', dest='batch_size', type=int, required=True)
     parser.add_argument('--is_query', dest='is_query', action='store_true')
     args = parser.parse_args()
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_path)
-    model = Blade(args.model_path)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    model = Blade(args.model_name)
     
     device = torch.device("cuda")
     model.to(device)
