@@ -2,6 +2,26 @@
 BLADE (Bilingual Lexical AnD Expansion model) is a neural CLIR method, which creates sparse bilingual vectors for queries and documents in two different languages.
 
 BLADE is powered by a bilingual language model, created by pruning a multilingual pretrained language model (mBERT).
+
+# Installation
+BLADE requires Python 3.9+ and PyTorch 1.9+ and uses [HuggingFace Transformers](https://github.com/huggingface/transformers) library.
+
+```
+conda env create -f environment_release.yml
+conda activate blade
+```
+
+BLADE also requires [Anserini](https://github.com/castorini/anserini/tree/anserini-0.14.1) for indexing and retrieval.
+Please refer to the link above for installing Anserini.
+
+# Training BLADE model
+
+BLADE model can be trained in a two-step process.
+
+## Step 1: Intermediate Pretraining
+
+We start with a pruned bilingual language model consisting of query and document language and perform an intermediate pretraining using aligned texts expressed in their native language. 
+
 The pruned bilingual models are available for most of the CLIR documents collections used in the paper.
 - French: https://huggingface.co/Geotrend/bert-base-en-fr-cased
 - Italian: https://huggingface.co/Geotrend/bert-base-en-it-cased
@@ -11,14 +31,6 @@ The pruned bilingual models are available for most of the CLIR documents collect
 - Russian: https://huggingface.co/Geotrend/bert-base-en-ru-cased
 
 For Persian, we create a pruned bilingual model using the steps detailed in the [Geotrend codebase](https://github.com/Geotrend-research/smaller-transformers) and release it on the HuggingFace [hub](https://huggingface.co/srnair/bert-base-en-fa-cased) 
-
-# Training BLADE model
-
-BLADE model can be trained in a two-step process.
-
-## Step 1: Intermediate Pretraining
-
-We start with a pruned bilingual language model consisting of query and document language and perform an intermediate pretraining using aligned texts expressed in their native language. 
 
 Assuming we have aligned pairs of text (parallel sentences/passages or comparable passages) in the format `{query_language_text}\t{document_language_text}`, we preprocess the dataset using the code below:
 

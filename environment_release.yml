@@ -1,0 +1,18 @@
+name: blade
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9.7
+  - pip=23.2
+  - pip:
+      - datasets==1.18.0
+      - huggingface-hub==0.2.1
+      - numpy==1.22.1
+      - sentencepiece==0.1.96
+      - tokenizers==0.10.3
+      - torch==1.9.0
+      - torchaudio==0.9.0
+      - torchvision==0.10.0
+      - tqdm==4.62.3
+      - transformers==4.15.0
