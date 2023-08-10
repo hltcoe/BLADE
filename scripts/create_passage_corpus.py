@@ -15,7 +15,7 @@ logging.getLogger("transformers.tokenization_utils_base").setLevel(logging.ERROR
 def strip_newlines(text: str) -> str:
     text = text.replace("\n", " ")
     text = re.sub("\s+", " ", text)
-    return text
+    return text.lower()
 
 def process_documents(args) -> Dict[str, str]:
     num_docs = sum(1 for line in open(args.corpus))
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script that generates overlapping passages from a JSONL document collection")
     parser.add_argument("--root", type=str, required=True)
     parser.add_argument("--corpus", type=str, required=True)
-    parser.add_argument("--model_name", type=str)
+    parser.add_argument("--model_name", type=str, required=True)
     parser.add_argument("--length", type=int, default=256)
     parser.add_argument("--stride", type=int, default=128)
     parser.add_argument("--docid", type=str, default="id")

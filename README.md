@@ -103,7 +103,10 @@ For each experiment, we use `$EXP_DIR` as the root directory where the data file
 We need to split the raw text documents into passages to apply the BLADE ranking model. The code to create passages is shown below
 
 ```
+mkdir -p $EXP_DIR
+
 python scripts/create_passage_corpus.py \
+ --model_name srnair/blade-en-${LANG}
  --root $EXP_DIR \
  --corpus path_to_collection.jsonl \
  --length 256 \
@@ -149,6 +152,7 @@ python inference.py \
     --batch_size=128
 ```
 
+The model path could be the fine-tuned model available on HuggingFace or a custom fine-tuned model path stored locally.
 The input here is the `collection.tsv` file generated as part of the data prep process above.
 The script outputs the blade vectors in JSONL file which is in a compatible format to be indexed by Anserini.
 

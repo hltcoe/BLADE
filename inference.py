@@ -4,6 +4,7 @@ import heapq
 import torch
 import operator
 
+from tqdm import tqdm
 from argparse import ArgumentParser
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 
@@ -81,11 +82,12 @@ if __name__=="__main__":
     reverse_voc = {v : k for k, v in tokenizer.vocab.items()}
     top_k = int(len(tokenizer) * 0.01) # Only preserving the top 10% of the highest weights
     max_length = 32 if args.is_query else 256
+    batch_size = args.batch_size
 
     with open(args.output, "w") as f:
         for i in tqdm(range(0, len(texts), batch_size), total = math.ceil(len(texts) / batch_size)):
             text_batch = texts[i:i+batch_size]
-            pid_batch = ids[i:i+batch_size]
+            pid_batch = pids[i:i+batch_size]
             res = process_text(text_batch, pid_batch, model, tokenizer, device, reverse_voc, max_length, top_k)
             
             for id_, text in zip(pid_batch, text_batch):
