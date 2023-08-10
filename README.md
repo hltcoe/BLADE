@@ -179,7 +179,7 @@ sh path_to_anserini_target/appassembler/bin/IndexCollection \
     -collection JsonVectorCollection \
     -generator DefaultLuceneDocumentGenerator \
     -threads 16 \
-    -input collection \
+    -input $EXP_DIR/doc_outputs \
     -index $EXP_DIR/indexes/blade \
     -impact \
     -pretokenized
