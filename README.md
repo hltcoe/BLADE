@@ -244,11 +244,12 @@ To generate a document ranking file from the passage ranking file, you will need
 
 ```
 python scripts/aggregate_passage_scores.py \
-    --rank_file $EXP_DIR/runs/blade_passing_ranking.trec \
+    --rank_file $EXP_DIR/runs/blade_passage_ranking.trec \
     --mapping $EXP_DIR/mapping.tsv \
     --output $EXP_DIR/runs/blade_doc_ranking.trec
 ```
 
+The passage-level scores are aggregated using max (MaxP) to generate a document-level score.
 Evaluation can be performed using  `trec_eval`:
 
 ```
