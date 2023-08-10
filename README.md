@@ -219,7 +219,7 @@ The script takes as input a tsv file in the format `{query_id}\t{query_text}` an
 We need to convert the BLADE vectors into a compatible Anserini format first using the code shown below:
 
 ```
-python generate_anserini_queries.py \
+python scripts/generate_anserini_topics.py \
     --input=$EXP_DIR/runs/blade.jsonl \
     --output=$EXP_DIR/runs/blade_anserini.tsv
 ```
